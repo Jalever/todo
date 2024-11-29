@@ -20,11 +20,70 @@ impl TodoList {
             is_done,
         }
     }
+
+    pub fn add(conn: &Connection, name: &str) -> Result<()> {
+        conn.execute("INSERT INTO todolist (name) VALUES (?)", &[name])?;
+        Ok(())
+    }
+
+    pub fn list(conn: &Connection, sort_by_id: bool) -> Result<Vec<TodoList>> {
+        let sql = if sort_by_id {
+            "SELECT * FROM todolist BY id"
+        } else {
+            "SELECT * FROM todolist BY is_done, id"
+        };
+        let mut stmt = conn.prepare(sql)?;
+        let todo_iter = stmt.query_map((), |row| {
+            Ok(TodoList::new(
+                row.get(0)?,
+                row.get(1)?,
+                row.get(2)?,
+                row.get(3)?,
+            ))
+        })?;
+        let mut todo_item = Vec::new();
+        for item in todo_iter {
+            todo_item.push(item?);
+        }
+        Ok(todo_item)
+    }
+
+    pub fn print_list(todo_list: Vec<TodoList>) -> Result<()> {
+        for todo_item in todo_list {
+            let status = if todo_item.is_done == 1 {
+                style("Done").green()
+            } else {
+                style("Pending").red()
+            };
+            print!(
+                "{:>4} | {:<44} {:<8} {}",
+                style(todo_item.id).cyan().bright(),
+                style(truncate_at(&todo_item.name, 44)).bright(),
+                status,
+                style(todo_item.date_added).dim(),
+            )
+        }
+        Ok(())
+    }
+}
+
+pub fn truncate_at(input: &str, max: i32) -> String {
+    let max_len: usize = max as usize;
+    if input.len() > max_len {
+        let truncated = &input[..(max_len - 3)];
+        return format!("{}...", truncated);
+    };
+
+    input.to_string()
 }
 
 pub fn help() -> Result<()> {
     let help_title = "\nAvailable commands";
-    let help_text = r#"        
+    let help_text = r#"    
+        - add [TASK]
+            Ads new task/s
+            Example: tbr add "take a shower"
+
         - list
             Lists all tasks
             Example: tbr list

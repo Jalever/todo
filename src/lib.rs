@@ -1,3 +1,4 @@
+use console::style;
 use rusqlite::{Connection, Result};
 use std::fs;
 use std::path::Path;
@@ -19,6 +20,18 @@ impl TodoList {
             is_done,
         }
     }
+}
+
+pub fn help() -> Result<()> {
+    let help_title = "\nAvailable commands";
+    let help_text = r#"        
+        - list
+            Lists all tasks
+            Example: tbr list
+    "#;
+    println!("{}", style(help_title).cyan().bright());
+    println!("{}", style(help_text).green());
+    Ok(())
 }
 
 pub fn get_connection() -> Result<Connection> {

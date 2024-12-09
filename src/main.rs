@@ -22,6 +22,16 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
+        "toggle" => {
+            if args.len() < 3 {
+                std::process::exit(1);
+            } else {
+                let id = args[2].parse::<i32>().unwrap();
+                Todo::toggle(&conn, id)?;
+                println!("Toggle task with Id: {}", id);
+            }
+            Ok(())
+        }
         "list" => {
             println!("TODO List (sorted by id):");
             let todos = Todo::list(&conn, false)?;

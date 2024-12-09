@@ -2,7 +2,6 @@ use console::style;
 use rusqlite::{Connection, Result};
 use std::fs;
 use std::path::Path;
-use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct Todo {
@@ -66,6 +65,11 @@ impl Todo {
         }
         Ok(())
     }
+
+    pub fn toggle(conn: &Connection, id: i32) -> Result<()> {
+        conn.execute("UPDATE todo SET is_done = 1 - is_done WHERE id = ?", &[&id])?;
+        Ok(())
+    }
 }
 
 pub fn get_connection() -> Result<Connection> {
@@ -116,6 +120,8 @@ pub fn help() -> Result<()> {
     let help_text = r#"
             - add [TASK]
                 add new task/s
+            - toggle [TASK_ID]
+                toggle the status of a task (Done/Pending)
         "#;
     println!("{}", style(help_title).cyan().bright());
     println!("{}", style(help_text).green());

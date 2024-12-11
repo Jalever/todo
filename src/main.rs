@@ -1,3 +1,5 @@
+use console::style;
+use dialoguer::Confirm;
 use rusqlite::Result;
 use std::env;
 use todolist_by_rust::*;
@@ -39,6 +41,30 @@ fn main() -> Result<()> {
                 let id = args[2].parse::<i32>().unwrap();
                 Todo::remove(&conn, id)?;
                 println!("Removed task with ID: {}", id);
+            }
+            Ok(())
+        }
+        "reset" => {
+            let confirmation = Confirm::new()
+                .with_prompt(
+                    style("Do you really want to reset?")
+                        .bright()
+                        .red()
+                        .to_string(),
+                )
+                .interact();
+            match confirmation {
+                Ok(c) => {
+                    if c {
+                        Todo::reset(&conn)?;
+                        println!("Database reset, all tasks were removed.");
+                    } else {
+                        println!("Allright! well done.");
+                    }
+                }
+                Err(err) => {
+                    eprintln!("{}", err)
+                }
             }
             Ok(())
         }

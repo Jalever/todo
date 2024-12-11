@@ -30,6 +30,11 @@ impl Todo {
         Ok(())
     }
 
+    pub fn reset(conn: &Connection) -> Result<()> {
+        conn.execute("DELETE FROM todo", ())?;
+        Ok(())
+    }
+
     pub fn list(conn: &Connection, sort_by_status: bool) -> Result<Vec<Todo>> {
         let sql = if sort_by_status {
             "SELECT * FROM todo ORDER BY is_done, id"

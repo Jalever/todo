@@ -25,6 +25,11 @@ impl Todo {
         Ok(())
     }
 
+    pub fn remove(conn: &Connection, id: i32) -> Result<()> {
+        conn.execute("DELETE FROM todo where id = ?", &[&id])?;
+        Ok(())
+    }
+
     pub fn list(conn: &Connection, sort_by_status: bool) -> Result<Vec<Todo>> {
         let sql = if sort_by_status {
             "SELECT * FROM todo ORDER BY is_done, id"
@@ -118,10 +123,14 @@ pub fn truncate_at(input: &str, max: i32) -> String {
 pub fn help() -> Result<()> {
     let help_title = "\nAvailable commands:";
     let help_text = r#"
-            - add [TASK]
-                add new task/s
-            - toggle [TASK_ID]
-                toggle the status of a task (Done/Pending)
+        - add [TASK]
+            add new task/s
+
+        - toggle [TASK_ID]
+            toggle the status of a task (Done/Pending)
+            
+        - remove [TASK_ID]
+            remove a task
         "#;
     println!("{}", style(help_title).cyan().bright());
     println!("{}", style(help_text).green());

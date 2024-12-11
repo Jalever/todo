@@ -9,7 +9,6 @@ fn main() -> Result<()> {
     }
 
     let conn = get_connection()?;
-
     let command = &args[1];
     let remaining: &String = &args[2..].iter().cloned().collect::<Vec<_>>().join(" ");
 
@@ -29,6 +28,17 @@ fn main() -> Result<()> {
                 let id = args[2].parse::<i32>().unwrap();
                 Todo::toggle(&conn, id)?;
                 println!("Toggle task with Id: {}", id);
+            }
+            Ok(())
+        }
+        "remove" => {
+            if args.len() < 3 {
+                help()?;
+                std::process::exit(1);
+            } else {
+                let id = args[2].parse::<i32>().unwrap();
+                Todo::remove(&conn, id)?;
+                println!("Removed task with ID: {}", id);
             }
             Ok(())
         }

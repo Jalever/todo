@@ -136,6 +136,9 @@ pub fn help() -> Result<()> {
             
         - remove [TASK_ID]
             remove a task
+            
+        - reset
+            remove all tasks
         "#;
     println!("{}", style(help_title).cyan().bright());
     println!("{}", style(help_text).green());

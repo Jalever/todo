@@ -144,3 +144,41 @@ pub fn help() -> Result<()> {
     println!("{}", style(help_text).green());
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use lazy_static::lazy_static;
+    use std::sync::Mutex;
+
+    lazy_static! {
+        static ref DATABASE_CONNECTION: Mutex<Connection> = {
+            let conn = Connection::open_in_memory().expect("Failed to create in-memory database");
+            verify_db(&conn).expect("Cannot create tables");
+            Mutex::new(conn)
+        };
+    }
+
+    fn reset_db(conn: &Connection) -> Result<()> {
+        conn.execute("DELETE FROM todo", ())?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_add_todo() {
+        let conn = DATABASE_CONNECTION.lock().expect("Mutex lock failed");
+        reset_db(&conn).expect("failed to resetting the db");
+
+        let name = "Test todo";
+        Todo::add(&conn, name).expect("Failed to add todo.");
+
+        let mut stmt = conn
+            .prepare("SELECT COUNT(*) FROM todo WHERE name = ?")
+            .expect("Failed to prepare statement");
+        let count: i32 = stmt
+            .query_row(&[name], |row| row.get(0))
+            .expect("Failed to prepare statement");
+
+        assert_eq!(count, 1, "Todo was not added to the database.")
+    }
+}

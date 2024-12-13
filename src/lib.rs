@@ -181,4 +181,21 @@ mod tests {
 
         assert_eq!(count, 1, "Todo was not added to the database.")
     }
+
+    #[test]
+    fn test_list_todo() {
+        let conn = DATABASE_CONNECTION.lock().expect("Mutex lock failed.");
+        reset_db(&conn).expect("Failed to reset the db.");
+
+        Todo::add(&conn, "Task 1").expect("could not add todo");
+        Todo::add(&conn, "Task 2").expect("could not add todo");
+        Todo::add(&conn, "Task 3").expect("could not add todo");
+
+        let todos = Todo::list(&conn, false).expect("Failed to list todo");
+        assert_eq!(
+            todos.len(),
+            3,
+            "Wrong number of todo items returned by list()"
+        )
+    }
 }

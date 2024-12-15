@@ -198,4 +198,25 @@ mod tests {
             "Wrong number of todo items returned by list()"
         )
     }
+
+    #[test]
+    fn test_sort_todo() {
+        let conn = DATABASE_CONNECTION.lock().expect("Mutext lock failed.");
+        reset_db(&conn).expect("Failed to resetting the db.");
+        Todo::add(&conn, "Task 1").expect("Could not add todo.");
+        Todo::add(&conn, "Task 2").expect("Could not add Todo.");
+        Todo::add(&conn, "Task 3").expect("Could not add Todo.");
+        let todos = Todo::list(&conn, false).expect("Failed to list todo.");
+        Todo::toggle(&conn, todos[0].id).expect("Could not to toggle first entry.");
+        let todos = Todo::list(&conn, true).expect("Failed to sort todos");
+        assert_eq!(
+            todos[2].name, "Task 1",
+            "The todo marked as done was not the LAST one returned"
+        );
+        assert_eq!(
+            todos.len(),
+            3,
+            "Wrong number of todo items returned by sort()"
+        );
+    }
 }

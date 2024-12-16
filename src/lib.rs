@@ -26,7 +26,7 @@ impl Todo {
     }
 
     pub fn remove(conn: &Connection, id: i32) -> Result<()> {
-        conn.execute("DELETE FROM todo where id = ?", &[&id])?;
+        conn.execute("DELETE FROM todo WHERE id = ?", &[&id])?;
         Ok(())
     }
 
@@ -164,6 +164,15 @@ mod tests {
         Ok(())
     }
 
+    fn contains_task(todos: &Vec<Todo>, target_name: &str) -> bool {
+        for todo in todos {
+            if todo.name == target_name {
+                return true;
+            }
+        }
+        false
+    }
+
     #[test]
     fn test_add_todo() {
         let conn = DATABASE_CONNECTION.lock().expect("Mutex lock failed");
@@ -218,5 +227,28 @@ mod tests {
             3,
             "Wrong number of todo items returned by sort()"
         );
+    }
+
+    #[test]
+    fn test_rm_todo() {
+        let conn = DATABASE_CONNECTION.lock().expect("Mutext lock failed");
+        reset_db(&conn).expect("Failed to reset the db.");
+        Todo::add(&conn, "Task 1").expect("Could not add Todo.");
+        Todo::add(&conn, "Task 2").expect("Could not add Todo.");
+        Todo::add(&conn, "Task 3").expect("Could not add Todo.");
+        let todos = Todo::list(&conn, false).expect("Failed to list Todos");
+        Todo::remove(&conn, todos[0].id).expect("Could not remove first todo.");
+        let todos = Todo::list(&conn, false).expect("Failed to list Todos.");
+        dbg!(&todos);
+        // assert_eq!(
+        //     todos.len(),
+        //     2,
+        //     "Wrong number of todo items returned by sort()"
+        // );
+        assert_eq!(
+            contains_task(&todos, "Task 1"),
+            false,
+            "Task 1 was not deleted."
+        )
     }
 }

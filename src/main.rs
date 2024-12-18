@@ -2,7 +2,7 @@ use console::style;
 use dialoguer::Confirm;
 use rusqlite::Result;
 use std::env;
-use todolist_by_rust::*;
+use todo::*;
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();

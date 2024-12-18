@@ -240,15 +240,34 @@ mod tests {
         Todo::remove(&conn, todos[0].id).expect("Could not remove first todo.");
         let todos = Todo::list(&conn, false).expect("Failed to list Todos.");
         dbg!(&todos);
-        // assert_eq!(
-        //     todos.len(),
-        //     2,
-        //     "Wrong number of todo items returned by sort()"
-        // );
+        assert_eq!(
+            todos.len(),
+            2,
+            "Wrong number of todo items returned by sort()"
+        );
         assert_eq!(
             contains_task(&todos, "Task 1"),
             false,
             "Task 1 was not deleted."
         )
+    }
+
+    #[test]
+    fn test_toggle_todo() {
+        let conn = DATABASE_CONNECTION.lock().expect("Mutex lock failed.");
+        reset_db(&conn).expect("Failed to reset the db.");
+        Todo::add(&conn, "Task 1").expect("Coudld not add todos.");
+        Todo::add(&conn, "Task 2").expect("Could not add todos.");
+
+        let todos = Todo::list(&conn, false).expect("Failed to list todos.");
+        Todo::toggle(&conn, todos[0].id).expect("Could not toggle first todo.");
+        let todos = Todo::list(&conn, false).expect("Failed to sort todos.");
+        dbg!(&todos);
+        assert_eq!(
+            todos.len(),
+            2,
+            "Wrong number of todo items returned by toggle()"
+        );
+        assert_eq!(todos[0].is_done, 1, "Task 1 was not toggled.");
     }
 }
